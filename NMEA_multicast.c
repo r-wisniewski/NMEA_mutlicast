@@ -28,6 +28,9 @@ void errorfunc()
 //use a macro to define maximum buffer size
 #define MAXBUFSIZE 1024
 
+//NMEA-0183 format strings
+char GPGGA[MAXBUFSIZE] = "$GPGGA,%.1f,%.8f,%c,%.8f,%c,%d,%d,%.1f,%.3f,%c,%.3f,%c,%.1f,%04d*%X"; 
+
 int main(int argc, char *argv[])
 {
 	// local interface is where we'll be sending data from
@@ -88,11 +91,12 @@ int main(int argc, char *argv[])
 	//////////////**** Send data to multicast group ****//////////////
 	//for now the data is statically stored in varaibles here
 	char lat = 'N', lon = 'W', unit = 'M';
-	float UTC = 172814.0, latnum = 3723.46587704, lonnum = 2202.26957864, HDOP = 1.2, ortho_height = 18.893, Geoid_sep = -25.669, Age = 2.0;
+	double latnum = 3723.46587704, lonnum = 2202.26957864;
+	float UTC = 172814.0, HDOP = 1.2, ortho_height = 18.893, Geoid_sep = -25.669, Age = 2.0;
 	int GPS_qual = 2, SV_in_use = 6, ref_station = 36, checksum = 79;
 	while(1){
 		//format the NMEA msg
-		sprintf(msg, "$GPGGA,%f,%f,%c,%f,%c,%d,%d,%f,%f,%c,%f,%c,%f,%04d*%X",UTC,latnum,lat,lonnum,lon,GPS_qual,SV_in_use,HDOP,ortho_height,unit,Geoid_sep,unit,Age,ref_station,checksum);
+		sprintf(msg, GPGGA ,UTC,latnum,lat,lonnum,lon,GPS_qual,SV_in_use,HDOP,ortho_height,unit,Geoid_sep,unit,Age,ref_station,checksum);
 		//sleep for 1 second and output NMEA msg ~1Hz
 		sleep(1);
 
