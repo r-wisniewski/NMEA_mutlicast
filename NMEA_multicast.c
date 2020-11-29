@@ -15,6 +15,7 @@ void errorfunc()
 	exit(1);
 };
 
+#include <time.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,7 +34,9 @@ int main(int argc, char *argv[])
 	// server_address is the mutlicast group
 	struct in_addr localInterface;
 	struct sockaddr_in server_address;
-	char msg[MAXBUFSIZE] = "$GPGGA,172814.0,3723.46587704,N,12202.26957864,W,2,6,1.2,18.893,M,-25.669,M,2.0,0031*4F";
+	char msg[MAXBUFSIZE];
+	time_t rawtime;
+    struct tm *info;
 
 	//Structure to run the server code is: ./NMEA_multicast Multicast_IPv4_Addr Port_Number Local_Multicast_Interface
     //check that the correct data is supplied
@@ -81,17 +84,25 @@ int main(int argc, char *argv[])
 	else{
 		printf("Successfully setup the local interface\n");
 	}
-	int n = 0;
+
 	//////////////**** Send data to multicast group ****//////////////
+	//for now the data is statically stored in varaibles here
+	char lat = 'N', lon = 'W', unit = 'M';
+	float UTC = 172814.0, latnum = 3723.46587704, lonnum = 2202.26957864, HDOP = 1.2, ortho_height = 18.893, Geoid_sep = -25.669, Age = 2.0;
+	int GPS_qual = 2, SV_in_use = 6, ref_station = 36, checksum = 79;
 	while(1){
+		//format the NMEA msg
+		sprintf(msg, "$GPGGA,%f,%f,%c,%f,%c,%d,%d,%f,%f,%c,%f,%c,%f,%04d*%X",UTC,latnum,lat,lonnum,lon,GPS_qual,SV_in_use,HDOP,ortho_height,unit,Geoid_sep,unit,Age,ref_station,checksum);
 		//sleep for 1 second and output NMEA msg ~1Hz
 		sleep(1);
+
 		if(sendto(server_socket, msg, sizeof(msg), 0, (struct sockaddr*)&server_address, sizeof(server_address)) == -1){
 		errorfunc();
 		}
 		else{
-		n++;
-		printf("Successfully sent multicast packet. Loop: %d\n", n);
+		time(&rawtime);
+    	info = localtime(&rawtime);
+		printf("Sent multicast packet \"%s\" at %s", msg, asctime(info));
 		}
 	}
 	return 0;
