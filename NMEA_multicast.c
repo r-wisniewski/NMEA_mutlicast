@@ -24,6 +24,7 @@ void errorfunc()
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
+#include <string.h>
 
 //use a macro to define maximum buffer size
 #define MAXBUFSIZE 1024
@@ -33,6 +34,10 @@ char GPGGA[MAXBUFSIZE] = "$GPGGA,%.1f,%.8f,%c,%.8f,%c,%d,%d,%.1f,%.3f,%c,%.3f,%c
 
 int main(int argc, char *argv[])
 {
+	//frequency in hertz
+	printf("Please enter desired NMEA message frequency in Hz:\n");
+	int freq;
+	scanf("%d", &freq);
 	// local interface is where we'll be sending data from
 	// server_address is the mutlicast group
 	struct in_addr localInterface;
@@ -40,6 +45,7 @@ int main(int argc, char *argv[])
 	char msg[MAXBUFSIZE];
 	time_t rawtime;
     struct tm *info;
+	struct timespec ts;
 
 	//Structure to run the server code is: ./NMEA_multicast Multicast_IPv4_Addr Port_Number Local_Multicast_Interface
     //check that the correct data is supplied
@@ -87,7 +93,7 @@ int main(int argc, char *argv[])
 	else{
 		printf("Successfully setup the local interface\n");
 	}
-
+	printf("Outputting $GPGGA @ %d Hz to %s:%s\n\n", freq, argv[1], argv[2]);
 	//////////////**** Send data to multicast group ****//////////////
 	//for now the data is statically stored in varaibles here
 	char lat = 'N', lon = 'W', unit = 'M';
@@ -97,9 +103,9 @@ int main(int argc, char *argv[])
 	while(1){
 		//format the NMEA msg
 		sprintf(msg, GPGGA ,UTC,latnum,lat,lonnum,lon,GPS_qual,SV_in_use,HDOP,ortho_height,unit,Geoid_sep,unit,Age,ref_station,checksum);
-		//sleep for 1 second and output NMEA msg ~1Hz
-		sleep(1);
-
+		//nanosleep for appropriate time to meet frequency input
+		ts.tv_nsec = 1000000000/freq;
+		nanosleep(&ts, &ts);
 		if(sendto(server_socket, msg, sizeof(msg), 0, (struct sockaddr*)&server_address, sizeof(server_address)) == -1){
 		errorfunc();
 		}
