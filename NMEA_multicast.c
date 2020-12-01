@@ -1,11 +1,12 @@
 /*************************************************************
 *   Author: Robin Wisniewski, wisniewski.ro@gmail.com
-*   Usage: ./NMEA_Multicast Multicast_IPv4_Addr Port_Number Local_Multicast_Interface
+*   Usage: ./NMEA_Multicast Multicast_IPv4_Addr Port_Number Local_Multicast_Interface Frequency
 *	
 *   Parameters:
 *		- Multicast_IPv4_Addr: IPv4 mutlicast group address. Between 224.0.0.0 and 239.255.255.255
 *		- Port_Number: Port number of the multicast group
 *		- Local_Multicast_Interface: Local interface of server that outputs packets/messages to multicast group
+*		- Frequency: Output frequency of message
 */
 
 void errorfunc()
@@ -35,9 +36,8 @@ char GPGGA[MAXBUFSIZE] = "$GPGGA,%.1f,%.8f,%c,%.8f,%c,%d,%d,%.1f,%.3f,%c,%.3f,%c
 int main(int argc, char *argv[])
 {
 	//frequency in hertz
-	printf("Please enter desired NMEA message frequency in Hz:\n");
-	int freq;
-	scanf("%d", &freq);
+	int freq = atoi(argv[4]);
+
 	// local interface is where we'll be sending data from
 	// server_address is the mutlicast group
 	struct in_addr localInterface;
@@ -104,8 +104,14 @@ int main(int argc, char *argv[])
 		//format the NMEA msg
 		sprintf(msg, GPGGA ,UTC,latnum,lat,lonnum,lon,GPS_qual,SV_in_use,HDOP,ortho_height,unit,Geoid_sep,unit,Age,ref_station,checksum);
 		//nanosleep for appropriate time to meet frequency input
-		ts.tv_nsec = 1000000000/freq;
-		nanosleep(&ts, &ts);
+		if(freq == 1){
+			sleep(1);
+		}
+		else{
+			ts.tv_nsec = 1000000000/freq;
+			nanosleep(&ts, &ts);
+		}
+
 		if(sendto(server_socket, msg, sizeof(msg), 0, (struct sockaddr*)&server_address, sizeof(server_address)) == -1){
 		errorfunc();
 		}
