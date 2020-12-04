@@ -31,8 +31,8 @@ void errorfunc()
 #define MAXBUFSIZE 256
 
 //NMEA-0183 format strings
-char GPGGA[MAXBUFSIZE] = "$GPGGA,%.1f,%.8f,%c,%.8f,%c,%d,%d,%.1f,%.3f,%c,%.3f,%c,%.1f,%04d*%X"; 
-char GNGNS[MAXBUFSIZE] = "$GPGNS,%.02f,%.5f,%c,%.5f,%c,%s,%d,%.1f,%.2f,%.2f,,%04d*%X"; 
+char GPGGA[MAXBUFSIZE] = "$GPGGA,%.1f,%.8f,%c,%.8f,%c,%d,%d,%.1f,%.3f,%c,%.3f,%c,%.1f,%04d*%X\r\n"; 
+char GNGNS[MAXBUFSIZE] = "$GPGNS,%.02f,%.5f,%c,%.5f,%c,%s,%d,%.1f,%.2f,%.2f,,%04d*%X\r\n"; 
 
 //Declare global vars
 char msg[MAXBUFSIZE];
