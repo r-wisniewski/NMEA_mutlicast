@@ -1,6 +1,9 @@
 /*************************************************************
 *   Author: Robin Wisniewski, wisniewski.ro@gmail.com
-*   Usage: ./NMEA_Multicast 
+*   Usage: ./NMEA_Multicast [Local Interface IP Address]
+*
+*	Parameter(s):
+*	- Local Interface IP Address: The IP address of the interface outputting the messages
 */
 
 /****************************************************************************************** 
@@ -41,7 +44,7 @@ struct timespec ts;
 
 char multicast_group[MAXBUFSIZE] = "224.1.1.1";
 char multicast_port[MAXBUFSIZE] = "11111";
-char local_ip[MAXBUFSIZE] = "192.168.0.20";
+char local_ip[MAXBUFSIZE];
 
 //for now the data is statically stored in varaibles here
 // !!! No mutex protection for now !!!
@@ -51,7 +54,10 @@ float UTC = 172814.0, HDOP = 1.2, ortho_height = 18.893, Geoid_sep = -25.669, Ag
 int GPS_qual = 2, SV_in_use = 6, ref_station = 36, checksum = 79;
 
 int main(int argc, char *argv[])
-{
+{	
+	//set local interface IP
+	strcpy(local_ip,argv[1]);
+
 	//All are hardcoded for now, but with refinement can be input from a config file
 	pthread_t thread_id1, thread_id2;
 
@@ -120,12 +126,7 @@ void *multicast_operation(void *arguments){
 	//The multicast addresses are in the range 224.0.0.0 through 239.255.255.255
 	//use 224.1.1.1 to test
 	server_address.sin_addr.s_addr = inet_addr(multicast_group);
-	/*
-	int enable = 1;
-	if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) == -1){
-		    printf("setsockopt(SO_REUSEADDR) failed");
-	}
-	*/
+
 	//////////////**** Set the local interface we'll be spitting data out of ****//////////////
 	localInterface.s_addr = inet_addr(local_ip);
 	if(setsockopt(server_socket, IPPROTO_IP, IP_MULTICAST_IF, (char *)&localInterface, sizeof(localInterface)) == -1)

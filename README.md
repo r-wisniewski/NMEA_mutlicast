@@ -1,11 +1,14 @@
 ﻿# Usage
 
 ```
-Usage: ./NMEA_Multicast 
+Usage: ./NMEA_Multicast [Local Interface IP Address]
+
+Parameter(s):
+	- Local Interface IP Address: The IP address of the interface outputting the messages
 ```
 # Purpose
 
-This program will mutlicast a predefined NMEA string to a predefined multicast group. Future work will support adding a config file to add flexibility to this program.
+This program will mutlicast a predefined NMEA string to a predefined multicast group. Future work will support adding a config file to determine which messages are output and associated frequencies. Another addition will be a “worker” thread to take in data and update varibles such as latitude, longitude, etc…. This will require mutexes.
 
 Compile: cc NMEA_multicast.c -o NMEA_multicast -lpthread 
 
